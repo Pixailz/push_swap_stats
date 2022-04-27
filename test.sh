@@ -13,11 +13,11 @@ while [ "$NB_TEST" != 0 ]; do
 	let "NB_TEST=${NB_TEST}-1"
 done
 
-#cat ./result | sort -u -o result
+cat ./result | sort -u -o result
 
 result_min=$(awk 'NR==1{print $1}' result)
 result_max=$(awk 'END{print}' result)
 
-printf "for ${1} test on a list of length ${2} you have:\n"
+printf "for ${2} test on a list of length ${1} you have:\n"
 printf "min cycle: ${result_min}\n"
 printf "max cycle: ${result_max}\n"

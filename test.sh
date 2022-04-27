@@ -13,7 +13,7 @@ while [ "$NB_TEST" != 0 ]; do
 	let "NB_TEST=${NB_TEST}-1"
 done
 
-cat ./result | sort -u -o result
+cat ./result | sort -u -n -o result
 
 result_min=$(awk 'NR==1{print $1}' result)
 result_max=$(awk 'END{print}' result)

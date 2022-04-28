@@ -9,7 +9,13 @@ NB_TEST=$2
 
 while [ "$NB_TEST" != 0 ]; do
 	ARG=$(seq 1 ${MAX} | shuf)
-	./push_swap ${ARG} | sed -nE 's|Cycle : ([0-9]*)|\1|p' >> result
+	[ -f tmp ] && rm -f tmp
+	if [ -z $3 ]; then
+		./push_swap ${ARG} > tmp
+	else
+		./$3 ${ARG} > tmp
+	fi
+	cat ./tmp | wc -l >> result
 	let "NB_TEST=${NB_TEST}-1"
 done
 

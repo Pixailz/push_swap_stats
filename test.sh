@@ -1,29 +1,56 @@
 #!/bin/bash
 
-[ "$1" -le 1 ] && exit
-[ -z $2 ] && exit
-[ -f result ] && rm -f result
-
 MAX=$1
 NB_TEST=$2
 
-while [ "$NB_TEST" != 0 ]; do
-	ARG=$(seq 1 ${MAX} | shuf)
-	[ -f tmp ] && rm -f tmp
-	if [ -z $3 ]; then
-		./push_swap ${ARG} > tmp
-	else
-		./$3 ${ARG} > tmp
-	fi
-	cat ./tmp | wc -l >> result
-	let "NB_TEST=${NB_TEST}-1"
-done
+function check_checker() {
+	OLD_NB_TEST=${NB_TEST}
+	[ -f "./result_checker" ] && rm ./result_checker
+	while [ "$NB_TEST" != 0 ]; do
+		CURRENT_LIST=$(seq 1 ${MAX} | shuf | tr '\n' ' ')
+		./push_swap ${CURRENT_LIST} | ./checker_linux ${CURRENT_LIST} >> result_checker
+		let "NB_TEST=${NB_TEST}-1"
+	done
+	nb_of_ko=$(grep 'KO' ./result_checker | wc -l)
+	printf 'number of KO: %d\n'
+	NB_TEST=${OLD_NB_TEST}
+}
 
-cat ./result | sort -u -n -o result
+function print_result() {
+	printf "for ${NB_TEST} test on a list of length ${MAX} you have:\n"
+	printf "min cycle: ${result_min}\n"
+	printf "max cycle: ${result_max}\n"
+}
 
-result_min=$(awk 'NR==1{print $1}' result)
-result_max=$(awk 'END{print}' result)
+function check_cycle() {
+	OLD_NB_TEST=${NB_TEST}
+	[ -f "./result_cycle" ] && rm ./result_cycle
+	[ -f "./tmp_cycle" ] && rm ./tmp_cycle
+	while [ "$NB_TEST" != 0 ]; do
+		CURRENT_LIST=$(seq 1 ${MAX} | shuf | tr '\n' ' ')
+		./push_swap ${CURRENT_LIST} > tmp_cycle
+		echo $(wc -l ./tmp_cycle | cut -d' ' -f1) >> result_cycle
+		let "NB_TEST=${NB_TEST}-1"
+	done
+	sort -u ./result_cycle > sorted_cycle
+	result_min=$(awk 'NR==1{print $1}' sorted_cycle)
+	result_max=$(awk 'END{print}' sorted_cycle)
+	NB_TEST=${OLD_NB_TEST}
+	print_result
+}
 
-printf "for ${2} test on a list of length ${1} you have:\n"
-printf "min cycle: ${result_min}\n"
-printf "max cycle: ${result_max}\n"
+function clean_file() {
+	[ -f "./result_checker" ] && rm ./result_checker
+	[ -f "./result_cycle" ] && rm ./result_cycle
+	[ -f "./tmp_cycle" ] && rm ./tmp_cycle
+	[ -f "./sorted_cycle" ] && rm ./sorted_cycle
+}
+
+function main()
+{
+	check_checker
+	check_cycle
+	clean_file
+}
+
+main

@@ -1,2 +1,4 @@
 # push_swap_tester
-little test about push_swap porject
+
+little stats maker about push_swap project
+

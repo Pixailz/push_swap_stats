@@ -118,10 +118,24 @@ function  parse_result ()
 	result_med=$(echo "scale=2; ${tmp_total}/${NB_TEST}" | bc)
 }
 
-function print_result() {
+function print_error_list()
+{
+	index=1
+	while [ "${index}" -lt "${NB_TEST}" ]; do
+		current_result=$(sed -n "${index}p" ./result_checker)
+		if [ ${current_result} == "KO" ]; then
+			printf "${random_list[$((${index} - 1))]}has ${red}failed${reset}\n"
+		fi
+		let "index=${index}+1"
+	done
+}
+
+function print_result()
+{
 	if [ ${nb_of_ko} == 0 ]; then
 		printf "number of KO: ${green}%d${reset}\n" ${nb_of_ko}
 	else
+		print_error_list
 		printf "number of KO: ${blinking}${red}%d${reset}\n" ${nb_of_ko}
 	fi
 	if [ ${nb_of_error} == 0 ]; then
@@ -138,7 +152,8 @@ function print_result() {
 	printf "${red}max${reset} cycle: ${orange}${result_max}${reset}\n"
 }
 
-function clean_file() {
+function clean_file()
+{
 	[ -f "./result_checker" ] && rm -f ./result_checker
 	[ -f "./result_cycle" ] && rm -f ./result_cycle
 	[ -f "./tmp_cycle" ] && rm -f ./tmp_cycle

@@ -3,6 +3,8 @@
 #=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#==#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#
 #> utils/check function
 
+PUSH_SWAP_PATH="./push_swap"
+
 # BASH COLOR :)
 blue="\x1b[38;5;75m"
 red="\x1b[38;5;196m"
@@ -18,6 +20,8 @@ function usage()
 	printf "\t-h : show this help\n"
 	printf "\t-l : specify the length of the list\n"
 	printf "\t-n : specify the number of test to do\n"
+	printf "\t-m : do all \"Mandatory\" test, you can specify the number of \n"
+	printf "\ttest you wan't to do with all the test after the \"-m\"\n"
 	exit
 }
 
@@ -30,6 +34,13 @@ function p_error()
 {
 	printf "[${red}ERROR${reset}] $*\n"
 	exit
+}
+
+function p_part()
+{
+	printf "#=====================#\n"
+	printf "#${green}$1${reset}\n"
+	printf "#=====================#\n\n"
 }
 
 while [ "$1" != "" ]; do
@@ -49,6 +60,15 @@ while [ "$1" != "" ]; do
 			else
 				NB_TEST=${1}
 			fi
+			;;
+		-m)
+			shift
+			if [ -z ${1} ]; then
+				NB_TEST=10
+			else
+				NB_TEST=${1}
+			fi
+			MANDATORY=1
 			;;
 		-h)
 			usage
@@ -79,7 +99,9 @@ function check_arg()
 	esac
 }
 
-check_arg
+if [ -z ${MANDATORY} ]; then
+	check_arg
+fi
 #=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#==#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#
 
 #=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#==#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#
@@ -99,7 +121,7 @@ function exec_push_swap()
 	index=0
 	while [ "${index}" -lt "${NB_TEST}" ]; do
 		printf "list number %d\r" $((${index} + 1))
-		./push_swap ${random_list[${index}]} > tmp_cycle
+		${PUSH_SWAP_PATH} ${random_list[${index}]} > tmp_cycle
 		echo $(wc -l ./tmp_cycle | cut -d' ' -f1) >> result_cycle
 		cat ./tmp_cycle | ./checker_linux ${random_list[${index}]} >> result_checker 2>>result_checker
 		let "index=${index}+1"
@@ -170,5 +192,49 @@ function main ()
 	clean_file
 }
 
-main
+function mandatory()
+{
+	LENGTH=2
+	p_part "2"
+	main
+	printf "\n"
+	LENGTH=3
+	p_part "3"
+	main
+	printf "\n"
+	LENGTH=4
+	p_part "4"
+	main
+	printf "\n"
+	LENGTH=5
+	p_part "5"
+	main
+	printf "\n"
+	LENGTH=9
+	p_part "9"
+	main
+	printf "\n"
+	LENGTH=10
+	p_part "10"
+	main
+	printf "\n"
+	LENGTH=50
+	p_part "50"
+	main
+	printf "\n"
+	LENGTH=100
+	p_part "100"
+	main
+	printf "\n"
+	LENGTH=500
+	NB_TEST=20
+	p_part "500"
+	main
+}
+
+if [ -z ${MANDATORY} ]; then
+	main
+else
+	mandatory
+fi
 #=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#==#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#
